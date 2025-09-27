@@ -1,0 +1,1 @@
+The project uses ESLint for linting and follows the recommended rules from `eslint:recommended` and `typescript-eslint/recommended`. React-specific linting is also enforced using `eslint-plugin-react-hooks` and `eslint-plugin-react-refresh`.

@@ -1,0 +1,2 @@
+#!/bin/bash
+docker build -t mc-server-management:latest -f Dockerfile.minecraft .

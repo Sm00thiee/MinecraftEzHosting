@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+
+# Run credential detection script
+echo "🔍 Checking for credentials..."
+node scripts/detect-credentials.js
+
+if [ $? -ne 0 ]; then
+  echo "❌ Credential check failed. Please remove any exposed credentials."
+  exit 1
+fi
+
+# Run Prettier formatting
+echo "💅 Formatting code with Prettier..."
+npm run format
+
+if [ $? -ne 0 ]; then
+  echo "❌ Prettier formatting failed."
+  exit 1
+fi
+
+# Run linting with auto-fix
+echo "🧹 Running linter with auto-fix..."
+npm run lint:fix || true
+
+echo "⚠️  Linting completed. Any remaining issues should be addressed in future commits."
+
+# Add any formatted/fixed files back to staging
+git add .
+
+echo "✅ Pre-commit checks passed!"

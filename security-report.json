@@ -1,0 +1,75 @@
+{
+  "timestamp": "2025-09-27T16:53:23.776Z",
+  "summary": {
+    "errors": 0,
+    "warnings": 1,
+    "info": 11
+  },
+  "details": {
+    "errors": [],
+    "warnings": [
+      {
+        "message": "Potential hardcoded secret in Dockerfile",
+        "file": "Dockerfile.frontend",
+        "timestamp": "2025-09-27T16:53:23.774Z"
+      }
+    ],
+    "info": [
+      {
+        "message": ".env file is properly ignored by Git",
+        "file": null,
+        "timestamp": "2025-09-27T16:53:23.772Z"
+      },
+      {
+        "message": ".env.example file exists",
+        "file": null,
+        "timestamp": "2025-09-27T16:53:23.772Z"
+      },
+      {
+        "message": "Found axios - please ensure it's up to date",
+        "file": null,
+        "timestamp": "2025-09-27T16:53:23.773Z"
+      },
+      {
+        "message": "Found express - please ensure it's up to date",
+        "file": null,
+        "timestamp": "2025-09-27T16:53:23.773Z"
+      },
+      {
+        "message": "Checked Dockerfile.minecraft for security issues",
+        "file": null,
+        "timestamp": "2025-09-27T16:53:23.774Z"
+      },
+      {
+        "message": "Checked Dockerfile.frontend for security issues",
+        "file": null,
+        "timestamp": "2025-09-27T16:53:23.774Z"
+      },
+      {
+        "message": "Pre-commit hooks are installed",
+        "file": null,
+        "timestamp": "2025-09-27T16:53:23.774Z"
+      },
+      {
+        "message": "Credential detection script exists",
+        "file": null,
+        "timestamp": "2025-09-27T16:53:23.774Z"
+      },
+      {
+        "message": "Checked docker-compose.yml for security issues",
+        "file": null,
+        "timestamp": "2025-09-27T16:53:23.775Z"
+      },
+      {
+        "message": "Checked docker-compose.prod.yml for security issues",
+        "file": null,
+        "timestamp": "2025-09-27T16:53:23.775Z"
+      },
+      {
+        "message": "Checked Jenkinsfile for security issues",
+        "file": null,
+        "timestamp": "2025-09-27T16:53:23.775Z"
+      }
+    ]
+  }
+}

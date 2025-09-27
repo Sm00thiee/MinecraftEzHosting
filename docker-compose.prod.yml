@@ -1,0 +1,69 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+        - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+    container_name: mc-server-management-frontend
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  backend:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: mc-server-management-backend
+    ports:
+      - '3001:3001'
+    volumes:
+      # For Windows Docker Desktop - mount Docker socket (Linux backend)
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - NODE_ENV=production
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    networks:
+      - app-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  minecraft-template:
+    build:
+      context: .
+      dockerfile: Dockerfile.minecraft
+    volumes:
+      - minecraft-data:/data
+    environment:
+      EULA: 'true'
+    networks:
+      - minecraft-network
+    restart: unless-stopped
+    profiles:
+      - minecraft
+
+networks:
+  app-network:
+    driver: bridge
+  minecraft-network:
+    driver: bridge
+
+volumes:
+  minecraft-data:
+    driver: local

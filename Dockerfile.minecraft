@@ -1,0 +1,45 @@
+# Dockerfile for Minecraft Server Management
+# Based on itzg/minecraft-server with custom configurations
+
+FROM itzg/minecraft-server:java21-alpine
+
+# Set maintainer
+LABEL maintainer="MC Server Management"
+LABEL description="Custom Minecraft server container for MC Server Management"
+
+# Set environment variables with defaults
+ENV EULA=TRUE
+ENV TYPE=PAPER
+ENV VERSION=LATEST
+ENV MEMORY=2G
+ENV ENABLE_RCON=true
+ENV RCON_PASSWORD=${RCON_PASSWORD:-secure-default-password}
+ENV ENABLE_QUERY=true
+ENV ONLINE_MODE=true
+ENV DIFFICULTY=normal
+ENV MAX_PLAYERS=20
+ENV MOTD="A Minecraft Server managed by MC Server Management"
+ENV SPAWN_PROTECTION=16
+ENV VIEW_DISTANCE=10
+ENV SIMULATION_DISTANCE=10
+
+# Create necessary directories
+RUN mkdir -p /data/world /data/plugins /data/logs /data/backups
+
+# Set proper permissions
+RUN chown -R minecraft:minecraft /data
+
+# Switch to non-root user
+USER minecraft
+
+# Expose ports
+EXPOSE 25565/tcp
+EXPOSE 25575/tcp
+EXPOSE 25585/udp
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD mc-monitor status --host localhost --port $SERVER_PORT || exit 1
+
+# Use the default entrypoint from the base image
+# ENTRYPOINT ["/start"]

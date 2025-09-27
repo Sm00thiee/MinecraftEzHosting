@@ -1,0 +1,41 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: mc-server-management-backend
+    ports:
+      - '3001:3001'
+    volumes:
+      # For Windows Docker Desktop - mount Docker socket
+      - type: npipe
+        source: \\.\pipe\docker_engine
+        target: \\.\pipe\docker_engine
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - NODE_ENV=production
+      - DOCKER_HOST=npipe:////./pipe/docker_engine
+    networks:
+      - default
+    restart: unless-stopped
+  minecraft-template:
+    build:
+      context: .
+      dockerfile: Dockerfile.minecraft
+    volumes:
+      - minecraft-data:/data
+    environment:
+      EULA: 'true'
+    networks:
+      - minecraft-network
+
+networks:
+  minecraft-network:
+    driver: bridge
+
+volumes:
+  minecraft-data:
+    driver: local
