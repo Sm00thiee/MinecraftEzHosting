@@ -70,7 +70,7 @@ test.describe('Navigation', () => {
   });
 
   test('should load CSS and JavaScript resources', async ({ page }) => {
-    const responses: any[] = [];
+    const responses: Response[] = [];
 
     // Collect all network responses
     page.on('response', response => {

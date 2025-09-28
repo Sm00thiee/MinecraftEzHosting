@@ -75,7 +75,7 @@ test.describe('Performance Tests', () => {
 
           // Small delay to allow for cleanup
           await page.waitForTimeout(100);
-        } catch (error) {
+        } catch {
           // Some routes might not exist or require auth, that's okay
           continue;
         }
@@ -87,7 +87,8 @@ test.describe('Performance Tests', () => {
   });
 
   test('should optimize image loading', async ({ page }) => {
-    const imageRequests: any[] = [];
+    const imageRequests: Array<{ url: string; status: number; size?: string }> =
+      [];
 
     page.on('response', response => {
       if (response.url().match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
@@ -135,7 +136,7 @@ test.describe('Performance Tests', () => {
   });
 
   test('should minimize JavaScript bundle size', async ({ page }) => {
-    const jsRequests: any[] = [];
+    const jsRequests: Array<{ url: string; size?: string }> = [];
 
     page.on('response', response => {
       if (response.url().includes('.js') && response.status() === 200) {

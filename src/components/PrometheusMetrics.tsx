@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -26,7 +26,6 @@ import {
   Network,
   Globe,
   Database,
-  Clock,
   TrendingUp,
   Settings,
   ExternalLink,
@@ -34,20 +33,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-} from 'recharts';
+
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -74,7 +60,7 @@ interface PrometheusMetrics {
   minecraft_rcon_response_time_seconds?: number;
 
   // Custom metrics
-  custom_metrics?: Record<string, any>;
+  custom_metrics?: Record<string, unknown>;
 
   timestamp?: string;
 }
@@ -96,9 +82,6 @@ interface PrometheusMetricsProps {
 const PrometheusMetrics: React.FC<PrometheusMetricsProps> = ({ serverId }) => {
   const { session } = useAuth();
   const [metrics, setMetrics] = useState<PrometheusMetrics | null>(null);
-  const [historicalMetrics, setHistoricalMetrics] = useState<
-    PrometheusMetrics[]
-  >([]);
   const [config, setConfig] = useState<PrometheusConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -107,7 +90,7 @@ const PrometheusMetrics: React.FC<PrometheusMetricsProps> = ({ serverId }) => {
   const [rawMetricsData, setRawMetricsData] = useState<string>('');
   const [configExpanded, setConfigExpanded] = useState(false);
 
-  const fetchPrometheusMetrics = async () => {
+  const fetchPrometheusMetrics = useCallback(async () => {
     try {
       if (!session?.access_token) return;
 
@@ -140,9 +123,9 @@ const PrometheusMetrics: React.FC<PrometheusMetricsProps> = ({ serverId }) => {
       console.error('Error fetching Prometheus metrics:', err);
       setError('Failed to load Prometheus metrics');
     }
-  };
+  }, [serverId, session?.access_token]);
 
-  const fetchPrometheusConfig = async () => {
+  const fetchPrometheusConfig = useCallback(async () => {
     try {
       if (!session?.access_token) return;
 
@@ -177,7 +160,7 @@ const PrometheusMetrics: React.FC<PrometheusMetricsProps> = ({ serverId }) => {
     } catch (err) {
       console.error('Error fetching Prometheus config:', err);
     }
-  };
+  }, [serverId, session?.access_token]);
 
   const validatePrometheusConfig = async () => {
     try {
@@ -342,11 +325,11 @@ const PrometheusMetrics: React.FC<PrometheusMetricsProps> = ({ serverId }) => {
     }
   };
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([fetchPrometheusMetrics(), fetchPrometheusConfig()]);
     setRefreshing(false);
-  };
+  }, [fetchPrometheusMetrics, fetchPrometheusConfig]);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -368,7 +351,13 @@ const PrometheusMetrics: React.FC<PrometheusMetricsProps> = ({ serverId }) => {
     );
 
     return () => clearInterval(interval);
-  }, [serverId, config?.enabled, config?.collection_interval]);
+  }, [
+    serverId,
+    config?.enabled,
+    config?.collection_interval,
+    refreshData,
+    fetchPrometheusMetrics,
+  ]);
 
   if (loading) {
     return (

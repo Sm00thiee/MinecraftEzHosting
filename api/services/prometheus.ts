@@ -14,6 +14,7 @@ export class PrometheusService {
     url: string,
     timeout?: number
   ): Promise<PrometheusResponse> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const startTime = Date.now();
 
     try {
@@ -26,15 +27,15 @@ export class PrometheusService {
       });
 
       const metrics = response.data;
-      const responseTime = Date.now() - startTime;
 
       return {
         metrics,
         timestamp: new Date().toISOString(),
       };
-    } catch (error) {
-      const responseTime = Date.now() - startTime;
-
+    } catch (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _error
+    ) {
       return {
         metrics: '',
         timestamp: new Date().toISOString(),
@@ -86,16 +87,22 @@ export class PrometheusService {
 
       const results = await Promise.allSettled(scrapePromises);
 
-      return results.map((result, index) => {
-        if (result.status === 'fulfilled') {
-          return result.value;
-        } else {
-          return {
-            metrics: '',
-            timestamp: new Date().toISOString(),
-          };
+      return results.map(
+        (
+          result,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          _index
+        ) => {
+          if (result.status === 'fulfilled') {
+            return result.value;
+          } else {
+            return {
+              metrics: '',
+              timestamp: new Date().toISOString(),
+            };
+          }
         }
-      });
+      );
     } catch (error) {
       console.error('Error scraping all targets:', error);
       return [];

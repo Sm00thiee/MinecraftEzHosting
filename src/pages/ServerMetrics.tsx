@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -79,7 +79,7 @@ const ServerMetrics: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchCurrentMetrics = async () => {
+  const fetchCurrentMetrics = useCallback(async () => {
     try {
       if (!session?.access_token) {
         setError('Authentication required');
@@ -120,9 +120,9 @@ const ServerMetrics: React.FC = () => {
         'Failed to load current metrics. Please check if the server is running and try again.'
       );
     }
-  };
+  }, [serverId, session?.access_token]);
 
-  const fetchHistoricalMetrics = async () => {
+  const fetchHistoricalMetrics = useCallback(async () => {
     try {
       if (!session?.access_token) {
         return;
@@ -154,9 +154,9 @@ const ServerMetrics: React.FC = () => {
       console.error('Error fetching historical metrics:', err);
       setError('Failed to load historical metrics');
     }
-  };
+  }, [serverId, session?.access_token]);
 
-  const fetchAlerts = async () => {
+  const fetchAlerts = useCallback(async () => {
     try {
       if (!session?.access_token) {
         setAlerts([]);
@@ -181,9 +181,9 @@ const ServerMetrics: React.FC = () => {
       console.error('Error fetching alerts:', err);
       setAlerts([]);
     }
-  };
+  }, [serverId, session?.access_token]);
 
-  const fetchPrometheusConfig = async () => {
+  const fetchPrometheusConfig = useCallback(async () => {
     try {
       if (!session?.access_token) {
         return;
@@ -216,7 +216,7 @@ const ServerMetrics: React.FC = () => {
     } catch (err) {
       console.error('Error fetching Prometheus config:', err);
     }
-  };
+  }, [serverId, session?.access_token]);
 
   const togglePrometheusMonitoring = async () => {
     if (!prometheusConfig || !session?.access_token) return;
@@ -258,7 +258,7 @@ const ServerMetrics: React.FC = () => {
     }
   };
 
-  const refreshAllData = async () => {
+  const refreshAllData = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([
       fetchCurrentMetrics(),
@@ -267,7 +267,12 @@ const ServerMetrics: React.FC = () => {
       fetchPrometheusConfig(),
     ]);
     setRefreshing(false);
-  };
+  }, [
+    fetchCurrentMetrics,
+    fetchHistoricalMetrics,
+    fetchAlerts,
+    fetchPrometheusConfig,
+  ]);
 
   useEffect(() => {
     if (!serverId) return;
@@ -287,7 +292,7 @@ const ServerMetrics: React.FC = () => {
     }, 5000); // Poll every 5 seconds
 
     return () => clearInterval(interval);
-  }, [serverId]);
+  }, [serverId, refreshAllData, fetchCurrentMetrics, fetchAlerts]);
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';

@@ -46,7 +46,7 @@ export interface Server {
 export interface ServerSettings {
   id: string;
   server_id: string;
-  settings: Record<string, any>;
+  settings: Record<string, string | number | boolean>;
   created_at: string;
   updated_at: string;
 }
@@ -78,6 +78,6 @@ export interface AuditLog {
   action: string;
   resource_type: string;
   resource_id?: string;
-  details?: Record<string, any>;
+  details?: Record<string, string | number | boolean>;
   timestamp: string;
 }

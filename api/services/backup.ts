@@ -4,7 +4,6 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { DatabaseService } from './database.js';
 import { DockerService } from './docker.js';
-import type { Server } from '../../shared/types.js';
 
 const execAsync = promisify(exec);
 
@@ -311,7 +310,8 @@ export class BackupService {
   private static buildExtractCommand(
     backupPath: string,
     targetPath: string,
-    options: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _options: {
       restoreWorld?: boolean;
       restorePlugins?: boolean;
       restoreConfig?: boolean;

@@ -1,5 +1,4 @@
 import { Socket } from 'net';
-import { createHash } from 'crypto';
 
 export interface RconConfig {
   host: string;
@@ -24,7 +23,7 @@ export interface MinecraftMetrics {
   memory_used?: number;
   memory_max?: number;
   uptime?: number;
-  custom: Record<string, any>;
+  custom: Record<string, unknown>;
 }
 
 export class RconService {

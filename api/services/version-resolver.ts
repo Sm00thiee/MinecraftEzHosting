@@ -145,11 +145,13 @@ export class VersionResolver {
       axios.get(`${this.FABRIC_API}/versions/loader`),
     ]);
 
-    const stableGameVersions = gameVersions.data.filter((v: any) => v.stable);
+    const stableGameVersions = gameVersions.data.filter(
+      (v: { stable: boolean }) => v.stable
+    );
     const latestLoader = loaderVersions.data[0];
 
     const versions: MinecraftVersion[] = stableGameVersions.map(
-      (gameVersion: any) => ({
+      (gameVersion: { version: string; stable: boolean }) => ({
         version: gameVersion.version,
         type: 'fabric' as const,
         build_id: latestLoader.version,
@@ -177,11 +179,11 @@ export class VersionResolver {
 
     // Filter to release versions only
     const releaseVersions = manifest.versions.filter(
-      (v: any) => v.type === 'release'
+      (v: { type: string }) => v.type === 'release'
     );
 
     const versions: MinecraftVersion[] = releaseVersions.map(
-      (version: any) => ({
+      (version: { id: string }) => ({
         version: version.id,
         type: 'spigot' as const,
         url: `https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar`,

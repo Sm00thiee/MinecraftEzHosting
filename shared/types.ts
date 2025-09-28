@@ -57,7 +57,7 @@ export interface Metrics {
   disk_usage?: number;
   tps?: number;
   player_count: number;
-  custom_metrics: Record<string, any>;
+  custom_metrics: Record<string, unknown>;
 }
 
 export interface Log {
@@ -75,7 +75,7 @@ export interface AuditLog {
   action: string;
   target_type: string;
   target_id?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   created_at: string;
 }
 
@@ -103,7 +103,7 @@ export interface ServerWithSettings extends Server {
   settings?: ServerSettings;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -157,7 +157,7 @@ export interface MonitoringConfig {
   prometheus_port: number;
   custom_monitoring: boolean;
   scrape_interval: number;
-  exporter_config: Record<string, any>;
+  exporter_config: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -207,14 +207,12 @@ export interface UpdateMonitoringConfigRequest {
   prometheus_port?: number;
   custom_monitoring?: boolean;
   scrape_interval?: number;
-  exporter_config?: Record<string, any>;
+  exporter_config?: Record<string, unknown>;
 }
 
-export interface MonitoringConfigResponse
-  extends ApiResponse<MonitoringConfig> {}
+export type MonitoringConfigResponse = ApiResponse<MonitoringConfig>;
 
-export interface PrometheusMetricsResponse
-  extends ApiResponse<PrometheusResponse> {}
+export type PrometheusMetricsResponse = ApiResponse<PrometheusResponse>;
 
 // Enhanced Metrics with Prometheus support
 export interface EnhancedMetrics extends Metrics {

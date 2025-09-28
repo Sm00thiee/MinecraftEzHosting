@@ -26,7 +26,6 @@ test.describe('End-to-End Server Creation', () => {
   });
 
   test('should verify frontend can communicate with backend', async ({
-    page,
     request,
   }) => {
     // Test backend health endpoint

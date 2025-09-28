@@ -1,6 +1,4 @@
 import Docker from 'dockerode';
-import path from 'path';
-import fs from 'fs/promises';
 import crypto from 'crypto';
 import { DatabaseService } from './database.js';
 import type { Server, ContainerInfo } from '../../shared/types.js';
@@ -83,8 +81,10 @@ export class DockerService {
 
   // Get Docker image for server type and version
   private static getDockerImage(
-    type: Server['type'],
-    mcVersion: string
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _type: Server['type'],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _mcVersion: string
   ): string {
     // Use our custom image for better management
     return 'mc-server-management:latest';
@@ -95,7 +95,7 @@ export class DockerService {
     try {
       // Check if our custom image exists
       await docker.getImage('mc-server-management:latest').inspect();
-    } catch (error) {
+    } catch {
       console.log('Custom Docker image not found, building...');
       // Build the image from Dockerfile
       const stream = await docker.buildImage(
@@ -308,7 +308,10 @@ export class DockerService {
           const container = docker.getContainer(server.container_id);
           await container.stop({ t: 10 });
           await container.remove();
-        } catch (error) {
+        } catch (
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          _error
+        ) {
           console.log('Container already removed or not found');
         }
       }
@@ -318,7 +321,10 @@ export class DockerService {
       try {
         const volume = docker.getVolume(volumeName);
         await volume.remove();
-      } catch (error) {
+      } catch (
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        _error
+      ) {
         console.log(`Volume ${volumeName} not found or could not be removed.`);
       }
 
@@ -406,7 +412,7 @@ export class DockerService {
         stderr: true,
         follow: true,
         timestamps: true,
-      })) as any; // Type assertion to handle Docker API stream type
+      })) as NodeJS.ReadableStream; // Type assertion to handle Docker API stream type
 
       return logStream;
     } catch (error) {
@@ -473,8 +479,8 @@ update_interval: 15" > /data/plugins/minecraft-prometheus-exporter/config.yml
         `Prometheus exporter plugin installed for server ${serverId}`
       );
       return true;
-    } catch (error) {
-      console.error('Error installing prometheus exporter plugin:', error);
+    } catch (_error) {
+      console.error('Error installing prometheus exporter plugin:', _error);
       return false;
     }
   }
@@ -514,8 +520,8 @@ update_interval: 15" > /data/plugins/minecraft-prometheus-exporter/config.yml
 
       console.log(`Prometheus exporter plugin removed for server ${serverId}`);
       return true;
-    } catch (error) {
-      console.error('Error removing prometheus exporter plugin:', error);
+    } catch (_error) {
+      console.error('Error removing prometheus exporter plugin:', _error);
       return false;
     }
   }
@@ -550,7 +556,7 @@ update_interval: 15" > /data/plugins/minecraft-prometheus-exporter/config.yml
       await container.remove();
 
       return result.StatusCode === 0;
-    } catch (error) {
+    } catch {
       // If the volume does not exist, it will throw an error.
       return false;
     }
@@ -559,7 +565,7 @@ update_interval: 15" > /data/plugins/minecraft-prometheus-exporter/config.yml
   // Update prometheus exporter configuration
   static async updatePrometheusExporterConfig(
     serverId: string,
-    config: any
+    config: unknown
   ): Promise<boolean> {
     try {
       if (!(await this.isPrometheusExporterInstalled(serverId))) {
@@ -569,15 +575,16 @@ update_interval: 15" > /data/plugins/minecraft-prometheus-exporter/config.yml
       const volumeName = `mc-data-${serverId}`;
       const helperImage = 'alpine';
 
+      const configObj = config as Record<string, unknown>;
       const configContent = `# Prometheus Exporter Configuration
 # Generated automatically by MC Server Management
 
-enable_metrics: ${config.enable_metrics || true}
-metrics_port: ${config.metrics_port || 9225}
-enable_player_metrics: ${config.enable_player_metrics || true}
-enable_server_metrics: ${config.enable_server_metrics || true}
-enable_world_metrics: ${config.enable_world_metrics || true}
-update_interval: ${config.update_interval || 15}
+enable_metrics: ${configObj.enable_metrics || true}
+metrics_port: ${configObj.metrics_port || 9225}
+enable_player_metrics: ${configObj.enable_player_metrics || true}
+enable_server_metrics: ${configObj.enable_server_metrics || true}
+enable_world_metrics: ${configObj.enable_world_metrics || true}
+update_interval: ${configObj.update_interval || 15}
 `;
 
       const cmd = [
@@ -611,8 +618,8 @@ update_interval: ${config.update_interval || 15}
 
       console.log(`Prometheus exporter config updated for server ${serverId}`);
       return true;
-    } catch (error) {
-      console.error('Error updating prometheus exporter config:', error);
+    } catch (_error) {
+      console.error('Error updating prometheus exporter config:', _error);
       return false;
     }
   }

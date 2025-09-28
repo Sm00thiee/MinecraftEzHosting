@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import { supabaseAdmin } from '../config/supabase.js';
 import { DatabaseService } from '../services/database.js';
 import type { User } from '../../shared/types.js';

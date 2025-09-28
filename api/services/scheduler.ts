@@ -2,7 +2,6 @@ import * as cron from 'node-cron';
 import { DatabaseService } from './database.js';
 import { DockerService } from './docker.js';
 import { BackupService } from './backup.js';
-import type { Server } from '../../shared/types.js';
 
 export interface ScheduledTask {
   id: string;
@@ -85,7 +84,7 @@ export class SchedulerService {
         },
         {
           scheduled: false,
-        } as any
+        }
       );
 
       // Store task
@@ -158,7 +157,7 @@ export class SchedulerService {
         },
         {
           scheduled: false,
-        } as any
+        }
       );
 
       // Store task
@@ -255,7 +254,7 @@ export class SchedulerService {
           },
           {
             scheduled: false,
-          } as any
+          }
         );
 
         this.tasks.set(taskId, newCronJob);
@@ -304,7 +303,7 @@ export class SchedulerService {
       }
 
       // Remove from storage
-      await this.removeTaskFromStorage(taskId);
+      await this.removeTaskFromStorage();
 
       // Log audit event
       await DatabaseService.createAuditLog({
@@ -432,29 +431,33 @@ export class SchedulerService {
   }
 
   private static async loadTasksFromStorage(
-    serverId: string
+    serverId?: string
   ): Promise<ScheduledTask[]> {
     // Placeholder implementation
+    console.log(
+      `Loading tasks from storage${serverId ? ` for server ${serverId}` : ''}`
+    );
     return [];
   }
 
   private static async getTaskById(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     taskId: string
   ): Promise<ScheduledTask | null> {
     // Placeholder implementation
     return null;
   }
 
-  private static async removeTaskFromStorage(taskId: string): Promise<void> {
+  private static async removeTaskFromStorage(): Promise<void> {
     // Placeholder implementation
-    console.log(`Removing task from storage: ${taskId}`);
+    console.log(`Removing task from storage`);
   }
 
   // Stop all scheduled tasks
   static stop(): void {
     console.log('Stopping scheduler service...');
 
-    for (const [taskId, cronJob] of this.tasks) {
+    for (const cronJob of this.tasks.values()) {
       cronJob.stop();
       cronJob.destroy();
     }
@@ -470,9 +473,9 @@ export class SchedulerService {
     active_tasks: number;
     tasks: Array<{ id: string; type: string; enabled: boolean }>;
   } {
-    const taskInfo = Array.from(this.tasks.keys()).map(taskId => ({
-      id: taskId,
-      type: taskId.split('_')[0],
+    const taskInfo = Array.from(this.tasks.keys()).map(id => ({
+      id: id,
+      type: id.split('_')[0],
       enabled: true, // We only store enabled tasks in memory
     }));
 

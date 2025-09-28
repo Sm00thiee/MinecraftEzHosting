@@ -1,7 +1,7 @@
 import { RconService } from './rcon.js';
 import { DatabaseService } from './database.js';
 import { MonitoringService } from './monitoring.js';
-import type { Server, Metrics, MonitoringConfig } from '../../shared/types.js';
+import type { Server, MonitoringConfig } from '../../shared/types.js';
 
 export interface PrometheusMetricDefinition {
   name: string;

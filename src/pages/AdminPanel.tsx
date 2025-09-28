@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
   Card,
@@ -36,7 +36,7 @@ interface AuditLog {
   action: string;
   resource_type: string;
   resource_id: string | null;
-  details: any;
+  details: Record<string, string | number | boolean> | null;
   ip_address: string | null;
   user_agent: string | null;
   created_at: string;
@@ -58,9 +58,9 @@ const AdminPanel: React.FC = () => {
       fetchUsers();
       fetchAuditLogs();
     }
-  }, [user, session]);
+  }, [user, session, fetchUsers, fetchAuditLogs]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       if (!session?.access_token) {
         toast.error('No authentication token available');
@@ -84,9 +84,9 @@ const AdminPanel: React.FC = () => {
       console.error('Error fetching users:', error);
       toast.error('Error fetching users');
     }
-  };
+  }, [session?.access_token]);
 
-  const fetchAuditLogs = async () => {
+  const fetchAuditLogs = useCallback(async () => {
     try {
       if (!session?.access_token) {
         toast.error('No authentication token available');
@@ -112,7 +112,7 @@ const AdminPanel: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.access_token]);
 
   const updateUserPermissions = async (
     userId: string,

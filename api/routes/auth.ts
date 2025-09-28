@@ -1,13 +1,10 @@
 import { Router } from 'express';
-import { supabase, supabaseAdmin } from '../config/supabase.js';
+import { supabaseAdmin } from '../config/supabase.js';
 import { DatabaseService } from '../services/database.js';
 import {
   authenticateToken,
-  requireAllowed,
-  requireAdmin,
   type AuthenticatedRequest,
 } from '../middleware/auth.js';
-import type { User } from '../../shared/types.js';
 
 const router = Router();
 

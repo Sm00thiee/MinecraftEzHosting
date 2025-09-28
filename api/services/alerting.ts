@@ -1,6 +1,6 @@
 import { DatabaseService } from './database.js';
 import { MonitoringService } from './monitoring.js';
-import type { Server, Metrics } from '../../shared/types.js';
+import type { Metrics } from '../../shared/types.js';
 
 export interface Alert {
   id: string;
@@ -21,7 +21,7 @@ export interface Alert {
   resolved_at?: string;
   acknowledged_at?: string;
   acknowledged_by?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AlertRule {
@@ -202,7 +202,7 @@ export class AlertingService {
     message: string,
     currentValue?: number,
     threshold?: number,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<Alert> {
     try {
       // Check cooldown
@@ -437,20 +437,25 @@ export class AlertingService {
   }
 
   private static async loadAlertRulesFromStorage(
-    serverId: string
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _serverId: string
   ): Promise<AlertRule[]> {
     // Placeholder implementation - would load from database
     return [];
   }
 
   private static async loadAlertsFromStorage(
-    serverId: string
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _serverId: string
   ): Promise<Alert[]> {
     // Placeholder implementation - would load from database
     return [];
   }
 
-  private static async getAlertById(alertId: string): Promise<Alert | null> {
+  private static async getAlertById(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _alertId: string
+  ): Promise<Alert | null> {
     // Placeholder implementation - would load from database
     return null;
   }

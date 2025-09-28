@@ -80,49 +80,42 @@ app.get('/api', (req, res) => {
 });
 
 // Error handling middleware
-app.use(
-  (
-    error: any,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    console.error('API Error:', error);
+app.use((error: Error, req: express.Request, res: express.Response) => {
+  console.error('API Error:', error);
 
-    // Handle multer errors
-    if (error.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({
-        success: false,
-        error: 'File too large. Maximum size is 50MB.',
-      });
-    }
-
-    if (error.message === 'File type not allowed') {
-      return res.status(400).json({
-        success: false,
-        error:
-          'File type not allowed. Only .jar, .yml, .yaml, .properties, .txt, .json, .toml files are supported.',
-      });
-    }
-
-    // Handle JSON parsing errors
-    if (error instanceof SyntaxError && 'body' in error) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid JSON in request body',
-      });
-    }
-
-    // Generic error response
-    res.status(500).json({
+  // Handle multer errors
+  if (error.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({
       success: false,
-      error:
-        process.env.NODE_ENV === 'production'
-          ? 'Internal server error'
-          : error.message,
+      error: 'File too large. Maximum size is 50MB.',
     });
   }
-);
+
+  if (error.message === 'File type not allowed') {
+    return res.status(400).json({
+      success: false,
+      error:
+        'File type not allowed. Only .jar, .yml, .yaml, .properties, .txt, .json, .toml files are supported.',
+    });
+  }
+
+  // Handle JSON parsing errors
+  if (error instanceof SyntaxError && 'body' in error) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid JSON in request body',
+    });
+  }
+
+  // Generic error response
+  res.status(500).json({
+    success: false,
+    error:
+      process.env.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : error.message,
+  });
+});
 
 // 404 handler
 app.use('*', (req, res) => {

@@ -33,7 +33,6 @@ import {
   RotateCcw,
   Trash2,
   Settings,
-  Users,
   Activity,
   LogOut,
   User,
@@ -202,8 +201,9 @@ export default function Dashboard() {
         if (response.ok) {
           const data = await response.json();
           // Extract version strings from version objects
-          const versions = (data.data?.versions || []).map((v: any) =>
-            typeof v === 'string' ? v : v.version
+          const versions = (data.data?.versions || []).map(
+            (v: string | { version: string }) =>
+              typeof v === 'string' ? v : v.version
           );
           setAvailableVersions(versions);
           // Set the first version as default if no version is selected
@@ -364,7 +364,6 @@ export default function Dashboard() {
       });
 
       if (response.ok) {
-        const data = await response.json();
         toast.success('Server created successfully!');
         setCreateModalOpen(false);
         setFormData({ name: '', type: 'paper', version: '', memory: '2048' });

@@ -66,7 +66,7 @@ test.describe('Authentication Integration Tests', () => {
     expect(errorData.error).toBe('Access token required');
   });
 
-  test('should have proper CORS configuration', async ({ page, request }) => {
+  test('should have proper CORS configuration', async ({ request }) => {
     // Test API endpoint accessibility
     const apiResponse = await request.get('http://localhost:3001/health');
 

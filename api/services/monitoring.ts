@@ -32,7 +32,7 @@ export class MonitoringService {
       },
       {
         scheduled: false,
-      } as any
+      } as cron.ScheduleOptions
     );
 
     this.cronJob.start();
@@ -57,8 +57,8 @@ export class MonitoringService {
     }
 
     // Disconnect all RCON connections
-    RconService.disconnectAll().catch(error => {
-      console.error('Error disconnecting RCON connections:', error);
+    RconService.disconnectAll().catch(_error => {
+      console.error('Error disconnecting RCON connections:', _error);
     });
 
     this.isRunning = false;
@@ -207,9 +207,10 @@ export class MonitoringService {
       let networkRx = 0;
       let networkTx = 0;
       if (stats.networks) {
-        Object.values(stats.networks).forEach((network: any) => {
-          networkRx += network.rx_bytes || 0;
-          networkTx += network.tx_bytes || 0;
+        Object.values(stats.networks).forEach((network: unknown) => {
+          const net = network as { rx_bytes?: number; tx_bytes?: number };
+          networkRx += net.rx_bytes || 0;
+          networkTx += net.tx_bytes || 0;
         });
       }
 
@@ -217,9 +218,10 @@ export class MonitoringService {
       let blockIoRead = 0;
       let blockIoWrite = 0;
       if (stats.blkio_stats?.io_service_bytes_recursive) {
-        stats.blkio_stats.io_service_bytes_recursive.forEach((io: any) => {
-          if (io.op === 'Read') blockIoRead += io.value;
-          if (io.op === 'Write') blockIoWrite += io.value;
+        stats.blkio_stats.io_service_bytes_recursive.forEach((io: unknown) => {
+          const ioStat = io as { op?: string; value?: number };
+          if (ioStat.op === 'Read') blockIoRead += ioStat.value || 0;
+          if (ioStat.op === 'Write') blockIoWrite += ioStat.value || 0;
         });
       }
 
@@ -232,8 +234,8 @@ export class MonitoringService {
         block_io_read: blockIoRead,
         block_io_write: blockIoWrite,
       };
-    } catch (error) {
-      console.error('Error getting container stats:', error);
+    } catch (_error) {
+      console.error('Error getting container stats:', _error);
       return null;
     }
   }
@@ -242,7 +244,7 @@ export class MonitoringService {
   private static async getMinecraftMetrics(serverId: string): Promise<{
     tps?: number;
     player_count: number;
-    custom: Record<string, any>;
+    custom: Record<string, unknown>;
   }> {
     try {
       // First try RCON if available
@@ -266,14 +268,14 @@ export class MonitoringService {
 
       // Fallback to log parsing
       return await this.parseLogMetrics(serverId);
-    } catch (error) {
+    } catch (_error) {
       console.error(
         `Error getting Minecraft metrics for server ${serverId}:`,
-        error
+        _error
       );
       return {
         player_count: 0,
-        custom: { error: error.message, source: 'error' },
+        custom: { error: (_error as Error).message, source: 'error' },
       };
     }
   }
@@ -283,7 +285,7 @@ export class MonitoringService {
   private static async parseLogMetrics(serverId: string): Promise<{
     tps?: number;
     player_count: number;
-    custom: Record<string, any>;
+    custom: Record<string, unknown>;
   }> {
     try {
       const server = await DatabaseService.getServerById(serverId);
@@ -329,46 +331,63 @@ export class MonitoringService {
       const playerListMatch = logs.match(playerListPattern);
       if (playerListMatch) {
         metrics.player_count = parseInt(playerListMatch[1]);
-        (metrics.custom as any).max_players = parseInt(playerListMatch[2]);
+        (metrics.custom as Record<string, unknown>).max_players = parseInt(
+          playerListMatch[2]
+        );
       }
 
       // Parse TPS from logs (if server outputs TPS info)
       const tpsPattern = /TPS.*?([0-9.]+)/i;
       const tpsMatch = logs.match(tpsPattern);
       if (tpsMatch) {
-        (metrics as any).tps = parseFloat(tpsMatch[1]);
+        (
+          metrics as {
+            tps?: number;
+            player_count: number;
+            custom: Record<string, unknown>;
+          }
+        ).tps = parseFloat(tpsMatch[1]);
       }
 
       // Parse memory usage from logs
       const memoryPattern = /Memory.*?(\d+).*?MB.*?(\d+).*?MB/i;
       const memoryMatch = logs.match(memoryPattern);
       if (memoryMatch) {
-        (metrics.custom as any).memory_used = parseInt(memoryMatch[1]);
-        (metrics.custom as any).memory_max = parseInt(memoryMatch[2]);
+        (metrics.custom as Record<string, unknown>).memory_used = parseInt(
+          memoryMatch[1]
+        );
+        (metrics.custom as Record<string, unknown>).memory_max = parseInt(
+          memoryMatch[2]
+        );
       }
 
       // Parse world info
       const worldPattern = /Loading.*?world.*?(\w+)/i;
       const worldMatch = logs.match(worldPattern);
       if (worldMatch) {
-        (metrics.custom as any).world_name = worldMatch[1];
+        (metrics.custom as Record<string, unknown>).world_name = worldMatch[1];
       }
 
       // Parse startup time
       const startupPattern = /Done.*?([0-9.]+)s/i;
       const startupMatch = logs.match(startupPattern);
       if (startupMatch) {
-        (metrics.custom as any).startup_time = parseFloat(startupMatch[1]);
+        (metrics.custom as Record<string, unknown>).startup_time = parseFloat(
+          startupMatch[1]
+        );
       }
 
       return metrics;
-    } catch (error) {
-      console.error(`Error parsing log metrics for server ${serverId}:`, error);
+    } catch (_error) {
+      console.error(
+        `Error parsing log metrics for server ${serverId}:`,
+        _error
+      );
       return {
         player_count: 0,
         custom: {
           source: 'log_parse',
-          error: error.message,
+          error: (_error as Error).message,
         },
       };
     }
@@ -409,8 +428,11 @@ export class MonitoringService {
 
       console.log(`Monitoring started for server ${serverId}`);
       return true;
-    } catch (error) {
-      console.error(`Error starting monitoring for server ${serverId}:`, error);
+    } catch (_error) {
+      console.error(
+        `Error starting monitoring for server ${serverId}:`,
+        _error
+      );
       return false;
     }
   }
@@ -423,8 +445,8 @@ export class MonitoringService {
     try {
       const limit = Math.min(hours * 120, 10000); // 120 data points per hour (every 30s), max 10k
       return await DatabaseService.getServerMetrics(serverId, limit);
-    } catch (error) {
-      console.error('Error getting historical metrics:', error);
+    } catch (_error) {
+      console.error('Error getting historical metrics:', _error);
       return [];
     }
   }
@@ -455,8 +477,8 @@ export class MonitoringService {
       };
 
       return { current, averages };
-    } catch (error) {
-      console.error('Error getting aggregated metrics:', error);
+    } catch (_error) {
+      console.error('Error getting aggregated metrics:', _error);
       return {
         current: null,
         averages: {
@@ -503,8 +525,8 @@ export class MonitoringService {
   ): Promise<MonitoringConfig | null> {
     try {
       return await DatabaseService.getMonitoringConfig(serverId);
-    } catch (error) {
-      console.error('Error getting monitoring config:', error);
+    } catch (_error) {
+      console.error('Error getting monitoring config:', _error);
       return null;
     }
   }
@@ -546,9 +568,9 @@ export class MonitoringService {
       const updatedConfig = await DatabaseService.getMonitoringConfig(serverId);
       console.log('Final updated config:', updatedConfig);
       return updatedConfig;
-    } catch (error) {
-      console.error('Error updating monitoring config:', error);
-      throw error; // Re-throw to see the full error in the API response
+    } catch (_error) {
+      console.error('Error updating monitoring config:', _error);
+      throw _error; // Re-throw to see the full error in the API response
     }
   }
 
@@ -598,9 +620,9 @@ export class MonitoringService {
       };
 
       await DatabaseService.createOrUpdatePrometheusTarget(targetData);
-    } catch (error) {
-      console.error('Error creating prometheus target:', error);
-      throw error;
+    } catch (_error) {
+      console.error('Error creating prometheus target:', _error);
+      throw _error;
     }
   }
 
@@ -610,8 +632,8 @@ export class MonitoringService {
   ): Promise<void> {
     try {
       await DatabaseService.deactivatePrometheusTarget(serverId);
-    } catch (error) {
-      console.error('Error deactivating prometheus target:', error);
+    } catch (_error) {
+      console.error('Error deactivating prometheus target:', _error);
     }
   }
 
@@ -664,8 +686,8 @@ export class MonitoringService {
   static async getAllPrometheusTargets(): Promise<PrometheusTarget[]> {
     try {
       return await DatabaseService.getAllPrometheusTargets();
-    } catch (error) {
-      console.error('Error getting prometheus targets:', error);
+    } catch (_error) {
+      console.error('Error getting prometheus targets:', _error);
       return [];
     }
   }
@@ -707,20 +729,22 @@ export class MonitoringService {
           response_time: responseTime,
           error: response.ok ? undefined : `HTTP ${response.status}`,
         };
-      } catch (fetchError) {
+      } catch (_fetchError) {
         return {
           healthy: false,
           endpoint: target.endpoint_url,
           response_time: Date.now() - startTime,
           error:
-            fetchError instanceof Error ? fetchError.message : 'Unknown error',
+            _fetchError instanceof Error
+              ? _fetchError.message
+              : 'Unknown error',
         };
       }
-    } catch (error) {
-      console.error('Error checking prometheus health:', error);
+    } catch (_error) {
+      console.error('Error checking prometheus health:', _error);
       return {
         healthy: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: _error instanceof Error ? _error.message : 'Unknown error',
       };
     }
   }
@@ -746,8 +770,8 @@ export class MonitoringService {
       };
 
       await DatabaseService.createMetricAlert(alertData);
-    } catch (error) {
-      console.error('Error creating metric alert:', error);
+    } catch (_error) {
+      console.error('Error creating metric alert:', _error);
     }
   }
 
@@ -755,8 +779,8 @@ export class MonitoringService {
   static async getActiveAlerts(serverId: string): Promise<MetricAlert[]> {
     try {
       return await DatabaseService.getActiveAlerts(serverId);
-    } catch (error) {
-      console.error('Error getting active alerts:', error);
+    } catch (_error) {
+      console.error('Error getting active alerts:', _error);
       return [];
     }
   }
@@ -765,8 +789,8 @@ export class MonitoringService {
   static async resolveAlert(alertId: string): Promise<void> {
     try {
       await DatabaseService.resolveAlert(alertId);
-    } catch (error) {
-      console.error('Error resolving alert:', error);
+    } catch (_error) {
+      console.error('Error resolving alert:', _error);
     }
   }
 }

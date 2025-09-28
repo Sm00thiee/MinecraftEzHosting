@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -34,9 +34,9 @@ export default function PrometheusMonitoring() {
 
   useEffect(() => {
     fetchServers();
-  }, [session]);
+  }, [session, fetchServers]);
 
-  const fetchServers = async () => {
+  const fetchServers = useCallback(async () => {
     if (!session?.access_token) {
       setLoading(false);
       return;
@@ -110,7 +110,7 @@ export default function PrometheusMonitoring() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.access_token]);
 
   const prometheusEnabledServers = servers.filter(s => s.prometheus_enabled);
 

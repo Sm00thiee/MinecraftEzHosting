@@ -7,7 +7,6 @@ import type {
   Log,
   AuditLog,
   CreateServerRequest,
-  UpdateServerRequest,
   ServerWithSettings,
 } from '../../shared/types.js';
 
@@ -478,7 +477,7 @@ export class DatabaseService {
   }
 
   // Prometheus operations
-  static async getPrometheusTargets(): Promise<any[]> {
+  static async getPrometheusTargets(): Promise<unknown[]> {
     const { data, error } = await supabaseAdmin
       .from('prometheus_targets')
       .select('*')
@@ -495,7 +494,7 @@ export class DatabaseService {
 
   static async getPrometheusTargetByServerId(
     serverId: string
-  ): Promise<any | null> {
+  ): Promise<unknown | null> {
     const { data, error } = await supabaseAdmin
       .from('prometheus_targets')
       .select('*')
@@ -512,7 +511,7 @@ export class DatabaseService {
   }
 
   // Metric alerts operations
-  static async createMetricAlert(alertData: any): Promise<boolean> {
+  static async createMetricAlert(alertData: unknown): Promise<boolean> {
     const { error } = await supabaseAdmin
       .from('metric_alerts')
       .insert(alertData);
@@ -525,7 +524,7 @@ export class DatabaseService {
     return true;
   }
 
-  static async getActiveAlerts(serverId?: string): Promise<any[]> {
+  static async getActiveAlerts(serverId?: string): Promise<unknown[]> {
     let query = supabaseAdmin
       .from('metric_alerts')
       .select('*')
@@ -566,7 +565,7 @@ export class DatabaseService {
 
   // Additional prometheus target operations
   static async createOrUpdatePrometheusTarget(
-    targetData: any
+    targetData: unknown
   ): Promise<boolean> {
     const { error } = await supabaseAdmin
       .from('prometheus_targets')
@@ -594,7 +593,7 @@ export class DatabaseService {
     return true;
   }
 
-  static async getPrometheusTarget(serverId: string): Promise<any | null> {
+  static async getPrometheusTarget(serverId: string): Promise<unknown | null> {
     const { data, error } = await supabaseAdmin
       .from('prometheus_targets')
       .select('*')
@@ -609,7 +608,7 @@ export class DatabaseService {
     return data;
   }
 
-  static async getAllPrometheusTargets(): Promise<any[]> {
+  static async getAllPrometheusTargets(): Promise<unknown[]> {
     const { data, error } = await supabaseAdmin
       .from('prometheus_targets')
       .select('*')
@@ -643,7 +642,7 @@ export class DatabaseService {
   }
 
   // Monitoring configuration operations
-  static async getMonitoringConfig(serverId: string): Promise<any | null> {
+  static async getMonitoringConfig(serverId: string): Promise<unknown | null> {
     const { data, error } = await supabaseAdmin
       .from('monitoring_config')
       .select('*')
@@ -660,7 +659,7 @@ export class DatabaseService {
 
   static async updateMonitoringConfig(
     serverId: string,
-    config: any
+    config: unknown
   ): Promise<boolean> {
     const { error } = await supabaseAdmin.from('monitoring_config').upsert(
       {

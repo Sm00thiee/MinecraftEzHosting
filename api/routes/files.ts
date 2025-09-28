@@ -6,11 +6,11 @@ import {
   requireAllowed,
   type AuthenticatedRequest,
 } from '../middleware/auth.js';
+
 import multer from 'multer';
 import path from 'path';
 
 const router = Router();
-const fileAccessService = new FileAccessService();
 
 // Configure multer for file uploads
 const upload = multer({
@@ -57,10 +57,7 @@ router.get(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.owner_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -87,7 +84,6 @@ router.get(
     try {
       const { serverId } = req.params;
       const filePath = req.query.path as string;
-      const lines = parseInt(req.query.lines as string) || 1000;
 
       if (!filePath) {
         return res
@@ -103,10 +99,7 @@ router.get(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.owner_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -149,10 +142,7 @@ router.put(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.owner_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -204,10 +194,7 @@ router.post(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.owner_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -264,10 +251,7 @@ router.get(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.owner_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -334,10 +318,7 @@ router.delete(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.owner_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -397,10 +378,7 @@ router.post(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.owner_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -444,10 +422,7 @@ router.get(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.owner_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -472,7 +447,7 @@ router.get(
         });
 
         res.json({ success: true, data: { properties } });
-      } catch (error) {
+      } catch {
         // If server.properties doesn't exist, return empty properties
         res.json({ success: true, data: { properties: {} } });
       }
@@ -509,10 +484,7 @@ router.put(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.owner_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 

@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import path from 'path';
 import { DatabaseService } from '../services/database.js';
 import { DockerService } from '../services/docker.js';
 import { FileAccessService } from '../services/file-access.js';
@@ -9,8 +10,6 @@ import {
 } from '../middleware/auth.js';
 
 const router = Router();
-const dockerService = new DockerService();
-const fileAccessService = new FileAccessService();
 
 // Get server logs from database
 router.get(
@@ -31,10 +30,7 @@ router.get(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.user_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -65,10 +61,7 @@ router.get(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.user_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -100,10 +93,7 @@ router.get(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.user_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -146,8 +136,12 @@ router.get(
 
       // Handle client disconnect
       req.on('close', () => {
-        if (logStream && typeof (logStream as any).destroy === 'function') {
-          (logStream as any).destroy();
+        if (
+          logStream &&
+          'destroy' in logStream &&
+          typeof logStream.destroy === 'function'
+        ) {
+          logStream.destroy();
         }
       });
     } catch (error) {
@@ -176,10 +170,7 @@ router.get(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.user_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -207,7 +198,6 @@ router.get(
   async (req: AuthenticatedRequest, res) => {
     try {
       const { serverId, filename } = req.params;
-      const lines = parseInt(req.query.lines as string) || 1000;
 
       // Verify server ownership
       const server = await DatabaseService.getServerById(serverId);
@@ -217,10 +207,7 @@ router.get(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.user_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -268,10 +255,7 @@ router.get(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.user_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -286,8 +270,8 @@ router.get(
           .json({ success: false, error: 'Invalid filename' });
       }
 
-      // Get file info to validate access and get the actual path
-      const fileInfo = await FileAccessService.getFileInfo(
+      // Validate access before download
+      await FileAccessService.getFileInfo(
         serverId,
         `logs/${filename}`,
         req.user!.id,
@@ -296,12 +280,7 @@ router.get(
 
       // For download, we need to construct the full path manually since getSecureFilePath doesn't exist
       const MC_DATA_PATH = process.env.MC_DATA_PATH || '/opt/minecraft-servers';
-      const filePath = require('path').join(
-        MC_DATA_PATH,
-        serverId,
-        'logs',
-        filename
-      );
+      const filePath = path.join(MC_DATA_PATH, serverId, 'logs', filename);
 
       res.download(filePath, filename, error => {
         if (error) {
@@ -339,10 +318,7 @@ router.delete(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.user_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 
@@ -397,10 +373,7 @@ router.delete(
           .json({ success: false, error: 'Server not found' });
       }
 
-      if (
-        (server as any).user_id !== req.user!.id &&
-        req.user!.role !== 'admin'
-      ) {
+      if (server.user_id !== req.user!.id && req.user!.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -65,36 +65,39 @@ export default function FileBrowser({ serverId }: FileBrowserProps) {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
 
   // Load files for current directory
-  const loadFiles = async (path: string = currentPath) => {
-    if (!session?.access_token) return;
+  const loadFiles = useCallback(
+    async (path: string = currentPath) => {
+      if (!session?.access_token) return;
 
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/files/${serverId}?directory=${encodeURIComponent(path)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `/api/files/${serverId}?directory=${encodeURIComponent(path)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setFiles(data.data.files || []);
+        } else {
+          const error = await response.json();
+          toast.error(error.error || 'Failed to load files');
         }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setFiles(data.data.files || []);
-      } else {
-        const error = await response.json();
-        toast.error(error.error || 'Failed to load files');
+      } catch (error) {
+        console.error('Error loading files:', error);
+        toast.error('Failed to load files');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error loading files:', error);
-      toast.error('Failed to load files');
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [currentPath, serverId, session?.access_token]
+  );
 
   // Load file content
   const loadFileContent = async (filePath: string) => {
@@ -327,7 +330,7 @@ export default function FileBrowser({ serverId }: FileBrowserProps) {
   // Load files on mount and path change
   useEffect(() => {
     loadFiles();
-  }, [currentPath, serverId]);
+  }, [currentPath, serverId, loadFiles]);
 
   return (
     <div className="space-y-6">

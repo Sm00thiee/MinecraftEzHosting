@@ -8,7 +8,6 @@ import {
 } from '../middleware/auth.js';
 
 const router = Router();
-const monitoringService = new MonitoringService();
 
 // Get current metrics for a server
 router.get(
